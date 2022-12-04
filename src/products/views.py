@@ -5,18 +5,24 @@ import pandas as pd
 
 
 def chart_select_view(request):
+    error_message=None
     qs = Product.objects.all().values()
     qs2 = Purchase.objects.all().values()
     product_df = pd.DataFrame(qs)
     purchase_df = pd.DataFrame(qs2)
-    # qs2 = Product.objects.all().values_list()
     product_df['product_id'] = product_df['id']
-    df = pd.merge(purchase_df, product_df, on='product_id').drop(['id_y', 'created_dt_y'], axis=1).rename({'id_x': 'id',
-                                                                                                           'created_dt_x': 'created_dt'}
-                                                                                                          , axis=1)
+
+    if purchase_df.shape[0] > 0:
+        df = pd.merge(purchase_df, product_df, on='product_id').drop(['id_y', 'created_dt_y'], axis=1).rename({'id_x': 'id', 'created_dt_x': 'created_dt'}, axis=1)
+        if request.method == 'POST':
+            chart_type = request.POST['sales']
+            date_from = request.POST['date_from']
+            date_to = request.POST['date_to']
+    else:
+        error_message = 'No records in the database',
+        df = None
+
     context = {
-        'products': product_df.to_html(),
-        'purchase': purchase_df.to_html(),
-        'df': df.to_html()
+        'error_message': error_message
     }
     return render(request, 'products/main.html', context)

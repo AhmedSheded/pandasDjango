@@ -5,10 +5,12 @@
 {% endblock title %}
 
 {% block content %}
-    {{ df | safe }}
     <hr>
     <div>
-        <form action="" method="'POST" class="ui form">
+    {% if error_message %}
+        {{ error_message }}
+    {% endif %}
+        <form action="" method="POST" class="ui form">
         {% csrf_token %}
             <div class="field">
                 <label>Choose a chart type: </label>
